@@ -1,0 +1,44 @@
+local cooldown = 0.7
+
+activated = false
+deb = false
+slapped = false
+local slapanim
+
+script.Parent.Equipped:Connect(function()
+	slapanim = script.Parent.Parent.Humanoid:LoadAnimation(script.Parent.SlapAnim)
+end)
+
+script.Parent.Activated:Connect(function()
+	if activated == false and deb == false then 
+		deb = true
+		activated = true
+		slapanim:Play()
+		wait(0.3)
+		activated = false
+		wait(cooldown-0.3)
+		slapped = false
+		deb = false
+	end
+end)
+
+script.Parent.Hand.Touched:Connect(function(hit)
+	if activated == true and slapped == false and hit.Parent.FindFirstChild("Humanoid") and hit.Parent ~= script.Parent.Parent then
+		slapped = true
+		script.Parent.Hand.Slap:Play()
+		hit.Parent.Humanoid.Sit = true
+		local velocity = Instance.new("BodyVelocity", hit.Parent.HumanoidRootPart)
+		velocity.MaxForce = Vector3.new(3,3,3) *math.huge
+		local dir = (hit.Parent.HumanoidRootPart.CFrame.Position - script.Parent.Parent.HumanoidRootPart.CFrame.Position).Unit
+		velocity.Velocity = (dir + Vector3(0,2,0)).Unit *25
+		local rot = Instance.new("BodyAngularVelocity", hit.Parent.HumanoidRootPart)
+		rot.AngularVelocity = Vector3.new(1,1,1) *math.pi *2
+		rot.MaxTorque = Vector3.new(2,2,2) *math.huge
+		rot.P = 5000
+		
+		Game:GetService("Debris"):AddItem(velocity, 0.3)
+		Game:GetService("Debris"):AddItem(rot, 0.3)
+		wait(0.3)
+		hit.Parent.Humanoid.Sit = false
+	end
+end)
